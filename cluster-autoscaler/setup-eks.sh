@@ -30,11 +30,13 @@ aws autoscaling \
 export ASG_NAME=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[? Tags[? (Key=='eks:cluster-name') && Value=='$CLUSTER_NAME']].AutoScalingGroupName" --output text)
 
 
-for x in $ASG_NAME; do aws autoscaling update-auto-scaling-group --auto-scaling-group-name  $x  --min-size 3 --desired-capacity 3 --max-size 4; done
+for x in $ASG_NAME; do aws autoscaling update-auto-scaling-group --auto-scaling-group-name  $x  --min-size 1 --desired-capacity 1 --max-size 2; done
 
 eksctl utils associate-iam-oidc-provider \
     --cluster $CLUSTER_NAME \
     --approve
+
+wget https://raw.githubusercontent.com/narmitag/eks/main/cluster-autoscaler/k8s-asg-policy.json
 
 aws iam create-policy   \
   --policy-name k8s-asg-policy \
@@ -50,6 +52,8 @@ eksctl create iamserviceaccount \
 
 kubectl -n kube-system describe sa cluster-autoscaler
 
+
+wget https://raw.githubusercontent.com/narmitag/eks/main/cluster-autoscaler/cluster-autoscaler-autodiscover.yaml
 envsubst < cluster-autoscaler-autodiscover.yaml | kubectl apply -f -
 
 kubectl -n kube-system annotate deployment.apps/cluster-autoscaler  cluster-autoscaler.kubernetes.io/safe-to-evict="false"
