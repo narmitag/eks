@@ -1,6 +1,19 @@
 #from https://karpenter.sh/v0.6.3/getting-started/
 
-export CLUSTER_NAME="${USER}-karpenter-demo"
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+
+sudo yum -y install jq gettext bash-completion moreutils envsubst
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+sudo mv -v /tmp/eksctl /usr/local/bin
+
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+export CLUSTER_NAME="karpenter-demo"
 export AWS_DEFAULT_REGION="us-east-1"
 export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 
@@ -15,8 +28,7 @@ metadata:
   tags:
     karpenter.sh/discovery: ${CLUSTER_NAME}
 managedNodeGroups:
-  - instanceType: t2.small
-    amiFamily: AmazonLinux2
+  - instanceType: t3.small
     name: ${CLUSTER_NAME}-ng
     desiredCapacity: 1
     minSize: 1
@@ -25,9 +37,7 @@ iam:
   withOIDC: true
 EOF
 
-
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name ${CLUSTER_NAME} --query "cluster.endpoint" --output text)"
-
 
 TEMPOUT=$(mktemp)
 
@@ -38,7 +48,7 @@ curl -fsSL https://karpenter.sh/v0.6.3/getting-started/cloudformation.yaml  > $T
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides "ClusterName=${CLUSTER_NAME}"
 
-  eksctl create iamidentitymapping \
+eksctl create iamidentitymapping \
   --username system:node:{{EC2PrivateDNSName}} \
   --cluster "${CLUSTER_NAME}" \
   --arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/KarpenterNodeRole-${CLUSTER_NAME}" \
@@ -56,9 +66,6 @@ export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAM
 
 aws iam create-service-linked-role --aws-service-name spot.amazonaws.com
 
-yum -y install openssl 
-
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm repo add karpenter https://charts.karpenter.sh/
 helm repo update
 
@@ -70,19 +77,6 @@ helm upgrade --install --namespace karpenter --create-namespace \
   --set clusterEndpoint=${CLUSTER_ENDPOINT} \
   --set aws.defaultInstanceProfile=KarpenterNodeInstanceProfile-${CLUSTER_NAME} \
   --wait # for the defaulting webhook to install before creating a Provisioner
-
-helm repo add grafana-charts https://grafana.github.io/helm-charts
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-
-kubectl create namespace monitoring
-
-curl -fsSL https://karpenter.sh/v0.6.3/getting-started/prometheus-values.yaml | tee prometheus-values.yaml
-helm install --namespace monitoring prometheus prometheus-community/prometheus --values prometheus-values.yaml
-
-curl -fsSL https://karpenter.sh/v0.6.3/getting-started/grafana-values.yaml | tee grafana-values.yaml
-helm install --namespace monitoring grafana grafana-charts/grafana --values grafana-values.yaml
-
 
 cat <<EOF | kubectl apply -f -
 apiVersion: karpenter.sh/v1alpha5
@@ -104,5 +98,4 @@ spec:
       karpenter.sh/discovery: ${CLUSTER_NAME}
   ttlSecondsAfterEmpty: 30
 EOF
-
 
