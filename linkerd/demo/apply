@@ -1,0 +1,76 @@
+kubectl annotate ns demo config.linkerd.io/default-inbound-policy=deny
+
+
+cat << EOF | kubectl apply -f -
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  namespace: demo
+  name: admin
+spec:
+  port: linkerd-admin
+  podSelector:
+    matchLabels: {} # every pod
+  proxyProtocol: HTTP/1
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: ServerAuthorization
+metadata:
+  namespace: demo
+  name: admin-everyone
+spec:
+  server:
+    name: admin
+  client:
+    unauthenticated: true
+EOF
+
+linkerd authz -n demo deploy
+
+cat << EOF | kubectl apply -f -
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  namespace: demo
+  name: http
+  labels: {}
+spec:
+  podSelector:
+    matchLabels:
+      app: hostname-app
+  port: 
+  proxyProtocol: HTTP/1
+EOF
+
+
+cat << EOF | kubectl apply -f -
+apiVersion: policy.linkerd.io/v1beta1
+kind: ServerAuthorization
+metadata:
+  namespace: demo
+  name: ns-only
+spec:
+  server:
+    selector:
+      matchLabels: {}
+  client:
+    meshTLS:
+      identities:
+      - "*.demo.serviceaccount.identity.linkerd.cluster.local"
+EOF
+
+cat << EOF | kubectl apply -f -
+apiVersion: policy.linkerd.io/v1beta1
+kind: ServerAuthorization
+metadata:
+  namespace: demo
+  name: ingress
+spec:
+  server:
+    name: http
+  client:
+    meshTLS:
+      identities:
+      - "*.ingress-nginx.serviceaccount.identity.linkerd.cluster.local"
+EOF

@@ -5,7 +5,7 @@ kind: ClusterConfig
 metadata:
   name: ca-cluster
   region: us-east-1
-  version: "1.19"
+  version: "1.21"
 
 availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"]
 
@@ -14,17 +14,14 @@ managedNodeGroups:
   desiredCapacity: 1
   availabilityZones: ["us-east-1a"]
   instanceType: t3.small
-  ssh:
-    enableSsm: true
+  spot: true
 - name: nodegroupB
   desiredCapacity: 1
   availabilityZones: ["us-east-1b"]
   instanceType: t3.small
-  ssh:
-    enableSsm: true
+  spot: true
 - name: nodegroupC
   desiredCapacity: 1
   availabilityZones: ["us-east-1c"]
   instanceType: t3.small
-  ssh:
-    enableSsm: true
+  spot: true
