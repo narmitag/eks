@@ -14,24 +14,27 @@ metadata:
   version: "1.21"
 
 availabilityZones: ["${AWS_DEFAULT_REGION}a","${AWS_DEFAULT_REGION}b"]
+managedNodeGroups:
+  - instanceType: t3.small
+    name: ${CLUSTER_NAME}-ng
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 2
 
 EOF
 
 aws eks update-kubeconfig --name ${CLUSTER_NAME} --region=${AWS_DEFAULT_REGION}
 
-kubectl -n kube-system delete daemonset aws-node
-
 helm repo add cilium https://helm.cilium.io/
 
 helm install cilium cilium/cilium --version 1.9.13 \
   --namespace kube-system \
-  --set eni=true \
-  --set ipam.mode=eni \
-  --set egressMasqueradeInterfaces=eth0 \
+  --set cni.chainingMode=aws-cni \
+  --set enableIPv4Masquerade=false \
   --set tunnel=disabled \
-  --set nodeinit.enabled=true
-
-eksctl create nodegroup --cluster ${CLUSTER_NAME} --nodes 1 --node-type=m5.large --spot=true --nodes-min=1 --nodes-max=5
+  --set hubble.listenAddress=":4244" \
+  --set hubble.relay.enabled=true \
+  --set hubble.ui.enabled=true
 
 
 eksctl utils associate-iam-oidc-provider \
@@ -67,16 +70,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 #linkerd install | kubectl apply -f -
 
 
-export CILIUM_NAMESPACE=kube-system
-
-helm upgrade cilium cilium/cilium --version 1.9.13 \
-   --namespace $CILIUM_NAMESPACE \
-   --reuse-values \
-   --set hubble.listenAddress=":4244" \
-   --set hubble.relay.enabled=true \
-   --set hubble.ui.enabled=true
-
-   kubectl port-forward -n $CILIUM_NAMESPACE svc/hubble-ui --address 0.0.0.0 --address :: 12000:80
+ kubectl port-forward -n $CILIUM_NAMESPACE svc/hubble-ui --address 0.0.0.0 --address :: 12000:80
  http://localhost:12000/ 
 
 

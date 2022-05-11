@@ -1,0 +1,16 @@
+        eksctl create iamserviceaccount \
+              --name idm \
+              --namespace efs \
+              --cluster forgerock-test \
+              --attach-policy-arn arn:aws:iam::973101223973:policy/forgerock-test_idm_policy \
+              --approve \
+              --override-existing-serviceaccounts
+          
+          #Create Service account for IG
+          eksctl create iamserviceaccount \
+              --name ig \
+              --namespace efs \
+              --cluster forgerock-test \
+              --attach-policy-arn arn:aws:iam::973101223973:policy/forgerock-test_ig_policy \
+              --approve \
+              --override-existing-serviceaccounts

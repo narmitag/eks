@@ -1,0 +1,10 @@
+{
+    "AWS_Account": "${aws_account_id}",
+    "AWS_Region": "${aws_region}",
+    "Environment_Name" : "${environment_name}",
+    "Cert_Manager_Version": "${cert_manager_version}",
+    "Cluster_autoscaler_version": "${cluster_autoscaler_version}",
+    "Ingress_version": "${ingress_version}",
+    "EKS Version": "${eks_version}"
+  }
+

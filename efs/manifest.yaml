@@ -1,0 +1,2804 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: efs
+  name: efs
+---
+apiVersion: v1
+data:
+  IDM_ENVCONFIG_DIRS: /opt/openidm/resolver
+  LOGGING_PROPERTIES: /var/run/openidm/logging/logging.properties
+  OPENIDM_ANONYMOUS_PASSWORD: anonymous
+  OPENIDM_AUDIT_HANDLER_JSON_ENABLED: "false"
+  OPENIDM_AUDIT_HANDLER_STDOUT_ENABLED: "true"
+  OPENIDM_CLUSTER_REMOVE_OFFLINE_NODE_STATE: "true"
+  OPENIDM_CONFIG_REPO_ENABLED: "false"
+  OPENIDM_ICF_RETRY_DELAYSECONDS: "10"
+  OPENIDM_ICF_RETRY_MAXRETRIES: "12"
+  PROJECT_HOME: /opt/openidm
+  RCS_AGENT_CONNECTION_CHECK_SECONDS: "5"
+  RCS_AGENT_CONNECTION_GROUP_CHECK_SECONDS: "900"
+  RCS_AGENT_CONNECTION_TIMEOUT_SECONDS: "10"
+  RCS_AGENT_HOST: rcs-agent
+  RCS_AGENT_IDM_PRINCIPAL: idmPrincipal
+  RCS_AGENT_PATH: idm
+  RCS_AGENT_PORT: "80"
+  RCS_AGENT_USE_SSL: "false"
+  RCS_AGENT_WEBSOCKET_CONNECTIONS: "1"
+kind: ConfigMap
+metadata:
+  labels:
+    app: idm
+    app.kubernetes.io/component: idm
+    app.kubernetes.io/instance: idm
+    app.kubernetes.io/name: idm
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: idm
+  namespace: efs
+---
+apiVersion: v1
+data:
+  logging.properties: |
+    # Properties file that configures the operation of the JDK
+    # logging facility.
+    # The system will look for this configuration file, first using
+    # a System property specified at startup:
+    #
+    # >java -Djava.util.logging.config.file=myLoggingConfigFilePath
+    #
+    # If this property is not specified, then the configuration file is
+    # retrieved from its default location at:
+    #
+    # JDK_HOME/jre/lib/logging.properties
+    ############################################################
+    #      Global properties
+    ############################################################
+    # ------------------------------------------
+    # The set of handlers to be loaded upon startup.
+    # Comma-separated list of class names.
+    # (? LogManager docs say no comma here, but JDK example has comma.)
+    # StreamHandler: A simple handler for writing formatted records to an OutputStream.
+    # ConsoleHandler: A simple handler for writing formatted records to System.err
+    # FileHandler: A handler that writes formatted log records either to a single file, or to a set of rotating log files.
+    # SocketHandler: A handler that writes formatted log records to remote TCP ports.
+    # MemoryHandler: A handler that buffers log records in memory.
+    # handlers=java.util.logging.ConsoleHandler
+    # handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+    # For Docker, write everything to the console
+    handlers=java.util.logging.ConsoleHandler
+    # Default global logging level.
+    # This specifies which kinds of events are logged across
+    # all loggers.  For any given facility this global level
+    # can be overriden by a facility specific level
+    # Note that the ConsoleHandler also has a separate level
+    # setting to limit messages printed to the console.
+    # Loggers and Handlers may override this level
+    .level=INFO
+    # Loggers
+    # ------------------------------------------
+    # Loggers are usually attached to packages.
+    # Here, the level for each package is specified.
+    # The global level is used by default, so levels
+    # specified here simply act as an override.
+    # The levels in descending order are:
+    #   SEVERE (highest value)
+    #   WARNING
+    #   INFO
+    #   CONFIG
+    #   FINE
+    #   FINER
+    #   FINEST (lowest value)
+    ############################################################
+    # Facility specific properties.
+    # Provides extra control for each logger.
+    ############################################################
+    #org.forgerock.openidm.provisioner.level = FINER
+    #org.forgerock.openidm.repo.level = FINER
+    #org.forgerock.openidm.recon.level = FINER
+    # OpenICF is noisy at INFO level
+    org.forgerock.openicf.level=WARNING
+    # Logs the output from OSGi logging
+    org.forgerock.openidm.Framework.level=WARNING
+    # On restart the BarURLHandler can create warning noise
+    org.activiti.osgi.BarURLHandler.level=SEVERE
+    # Suppress warnings of failed connector loading
+    org.identityconnectors.framework.impl.api.local.LocalConnectorInfoManagerImpl.level=SEVERE
+    ############################################################
+    # Handler specific properties.
+    # Describes specific configuration info for Handlers.
+    ############################################################
+    # --- ConsoleHandler ---
+    # Default: java.util.logging.ConsoleHandler.level = INFO
+    # Override of global logging level
+    #java.util.logging.ConsoleHandler.level = WARNING
+    # For Docker
+    java.util.logging.ConsoleHandler.level = INFO
+    java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+    # specifies the name of the filter class to be associated with this handler,
+    # defaults to {@code null} if this property is not found or has an invalid value.
+    java.util.logging.ConsoleHandler.filter=org.forgerock.openidm.logging.util.LogFilter
+    # --- FileHandler ---
+    # Override of global logging level
+    java.util.logging.FileHandler.level = ALL
+    # Naming style for the output file:
+    # (The output file is placed in the directory
+    # defined by the "user.home" System property.)
+    # java.util.logging.FileHandler.pattern = %h/java%u.log
+    java.util.logging.FileHandler.pattern = logs/openidm%u.log
+    # Limiting size of output file in bytes:
+    java.util.logging.FileHandler.limit = 5242880
+    # Number of output files to cycle through, by appending an
+    # integer to the base file name:
+    java.util.logging.FileHandler.count = 5
+    # Style of output (Simple or XML):
+    # Writes brief "human-readable" summaries of log records.
+    java.util.logging.FileHandler.formatter = java.util.logging.SimpleFormatter
+    # Writes detailed XML-structured information.
+    # java.util.logging.FileHandler.formatter = java.util.logging.XMLFormatter
+    # specifies the character set encoding name.
+    # defaults to the default platform encoding
+    java.util.logging.FileHandler.encoding = UTF-8
+kind: ConfigMap
+metadata:
+  labels:
+    app: idm
+    app.kubernetes.io/component: idm
+    app.kubernetes.io/instance: idm
+    app.kubernetes.io/name: idm
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: idm-logging-properties
+  namespace: efs
+---
+apiVersion: v1
+data:
+  DEMO_PFS_ENDPOINT: https://1b1f43m576.execute-api.eu-west-2.amazonaws.com/demo
+  DEV_PFS_ENDPOINT: https://84kedhiklk.execute-api.eu-west-2.amazonaws.com/dev
+  FEATURE-23743_PFS_ENDPOINT: https://skyls10i2k.execute-api.eu-west-2.amazonaws.com/feature-23743
+  FEATURE-24546_PFS_ENDPOINT: https://j7wsyze8cf.execute-api.eu-west-2.amazonaws.com/feature-24546
+  PERFORMANCE_PFS_ENDPOINT: https://7qcqej19pe.execute-api.eu-west-2.amazonaws.com/performance
+  SYS_PFS_ENDPOINT: https://6ponoqw4dc.execute-api.eu-west-2.amazonaws.com/sys
+  SYS2_PFS_ENDPOINT: https://fpxzggnsle.execute-api.eu-west-2.amazonaws.com/sys2
+kind: ConfigMap
+metadata:
+  labels:
+    env: efs
+  name: pfs-endpoints-9b8fhmgg5d
+  namespace: efs
+---
+apiVersion: v1
+data:
+  ADMIN_CLIENT_ID: idm-admin-ui
+  AM_ADMIN_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/am/ui-admin/
+  AM_SERVER_FQDN: efs.sandbox.k8s.dev.pensiondashboard.org
+  AM_STORES_CTS_SERVERS: ds-cts-0.ds-cts:1636,ds-cts-1.ds-cts:1636,ds-cts-2.ds-cts:1636
+  AM_STORES_UMA_SERVERS: ds-umarepo-0.ds-umarepo:1636
+  AM_STORES_UMA_USERNAME: uid=am-uma-bind-account,ou=admins,dc=uma-resources,dc=example,dc=com
+  AM_STORES_USER_SERVERS: ds-idrepo-0.ds-idrepo:1636,ds-idrepo-1.ds-idrepo:1636
+  AM_STORES_USER_USERNAME: uid=am-identity-bind-account,ou=admins,ou=identities,ou=pensions-dashboard,ou=dwp,ou=gov,ou=uk
+  AM_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/am
+  AUTORESTORE_FROM_DSBACKUP: "false"
+  CERT_ISSUER: default-issuer
+  DSBACKUP_DIRECTORY: ""
+  DSBACKUP_HOSTS: ds-cts-0,ds-idrepo-0
+  ENDUSER_CLIENT_ID: end-user-ui
+  ENDUSER_UI_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/enduser
+  FQDN: efs.sandbox.k8s.dev.pensiondashboard.org
+  FRAAS_LOGGING_URL: ""
+  IDM_ADMIN_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/admin
+  IDM_EXPORT_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/export
+  IDM_REST_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/openidm
+  IDM_UPLOAD_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/upload
+  LOGIN_UI_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/login/#/service/Login
+  PLATFORM_ADMIN_URL: https://efs.sandbox.k8s.dev.pensiondashboard.org/platform
+  PLATFORM_UI_IS_FRAAS: "false"
+  RCS_AGENT_ENABLED: "false"
+  THEME: default
+kind: ConfigMap
+metadata:
+  labels:
+    env: efs
+  name: platform-config
+  namespace: efs
+---
+apiVersion: v1
+data:
+  Agent.properties: |
+    agent.port=8080
+    agent.idm_route=/idm
+    agent.rcs_route=/rcs
+    agent.health_route=/health
+    agent.max_http_size=65536
+    agent.max_frame_bytes=20971520
+    agent.handshake_timeout_millis=10000
+    agent.shutdown_timeout_millis=25000
+    agent.ssl_enabled=false
+    agent.idm_principal=idmPrincipal
+    agent.rcs_principal=rcsPrincipal
+    #agent.idm_secret=forgeopsInjectsThisViaEnvVar
+    #agent.rcs_secret=forgeopsInjectsThisViaEnvVar
+    #agent.keystore_file=/mounted/path/to/keystore/file
+    #agent.keystore_secret=keystoreSecret
+    #agent.truststore_file=/mounted/path/to/truststore/file
+    #agent.truststore_secret=truststoreSecret
+    #agent.token_introspect_uri=http://am:80/am/oauth2/introspect
+    #agent.token_client_id=rcsAgentClientId
+    #agent.token_client_secret=rcsAgentClientSecret
+    #agent.required_scopes=fr:idm:*
+kind: ConfigMap
+metadata:
+  labels:
+    app: rcs-agent
+    app.kubernetes.io/component: rcs-agent
+    app.kubernetes.io/instance: rcs-agent
+    app.kubernetes.io/name: rcs-agent
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: rcs-agent-config-properties
+  namespace: efs
+---
+apiVersion: v1
+data:
+  logging.properties: |
+    handlers = java.util.logging.ConsoleHandler
+    org.forgerock.openicf.framework.agent.level = INFO
+    io.netty.level = INFO
+    java.util.logging.ConsoleHandler.level = INFO
+kind: ConfigMap
+metadata:
+  labels:
+    app: rcs-agent
+    app.kubernetes.io/component: rcs-agent
+    app.kubernetes.io/instance: rcs-agent
+    app.kubernetes.io/name: rcs-agent
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: rcs-agent-logging-properties
+  namespace: efs
+---
+apiVersion: v1
+data:
+  root: efs.sandbox.k8s.dev.pensiondashboard.org
+kind: ConfigMap
+metadata:
+  labels:
+    env: efs
+  name: urls
+  namespace: efs
+---
+apiVersion: v1
+data: null
+kind: Secret
+metadata:
+  labels:
+    affinity: directory
+    app: ds-cts
+    env: efs
+  name: cloud-storage-credentials-cts
+  namespace: efs
+type: Opaque
+---
+apiVersion: v1
+data: null
+kind: Secret
+metadata:
+  labels:
+    affinity: directory
+    app: ds-idrepo
+    env: efs
+  name: cloud-storage-credentials-idrepo
+  namespace: efs
+type: Opaque
+---
+apiVersion: v1
+data: null
+kind: Secret
+metadata:
+  labels:
+    affinity: directory
+    app: ds-umarepo
+    env: efs
+  name: cloud-storage-credentials-uma
+  namespace: efs
+type: Opaque
+---
+apiVersion: v1
+data: {}
+kind: Secret
+metadata:
+  labels:
+    app: ig
+    app.kubernetes.io/component: ig
+    app.kubernetes.io/instance: ig
+    app.kubernetes.io/name: ig
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: openig-secrets-env
+  namespace: efs
+type: Opaque
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: |
+    eyJhdXRocyI6eyJvcmlnb2Fjci5henVyZWNyLmlvIjp7InVzZXJuYW1lIjoiMjIyY2YyYj
+    AtZjk4ZS00Mzc3LTk2NzktMTY2YzhkMWJiMzQ1IiwicGFzc3dvcmQiOiJObTVPODIua0hq
+    WUM5TjBoMTl4NlhsVmZiLX5NazZ+VTdHIiwiYXV0aCI6Ik1qSXlZMll5WWpBdFpqazRaUz
+    AwTXpjM0xUazJOemt0TVRZMll6aGtNV0ppTXpRMU9rNXROVTg0TWk1clNHcFpRemxPTUdn
+    eE9YZzJXR3hXWm1JdGZrMXJObjVWTjBjPSJ9fX0K
+kind: Secret
+metadata:
+  labels:
+    env: efs
+  name: origoacr-credentials-hdh6kk64gh
+  namespace: efs
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: admin-ui
+    app.kubernetes.io/name: admin-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: admin-ui
+  namespace: efs
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: admin-ui
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: admin-ui
+    app.kubernetes.io/name: admin-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: am
+    app.kubernetes.io/component: am
+    app.kubernetes.io/instance: am
+    app.kubernetes.io/name: am
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: am
+  namespace: efs
+spec:
+  ports:
+  - name: am
+    port: 80
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: am
+    app.kubernetes.io/component: am
+    app.kubernetes.io/instance: am
+    app.kubernetes.io/name: am
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: consent-and-auth-ui
+    app.kubernetes.io/instance: consent-and-auth-ui
+    app.kubernetes.io/name: consent-and-auth-ui
+    env: efs
+    tier: ui
+  name: consent-and-auth-ui
+  namespace: efs
+spec:
+  ports:
+  - name: http
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app.kubernetes.io/component: consent-and-auth-ui
+    app.kubernetes.io/instance: consent-and-auth-ui
+    app.kubernetes.io/name: consent-and-auth-ui
+    env: efs
+    tier: ui
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: consent-and-auth-ui-storybook
+    app.kubernetes.io/instance: consent-and-auth-ui-storybook
+    app.kubernetes.io/name: consent-and-auth-ui-storybook
+    env: efs
+    tier: ui
+  name: consent-and-auth-ui-storybook
+  namespace: efs
+spec:
+  ports:
+  - name: http
+    port: 8082
+    protocol: TCP
+    targetPort: 8082
+  selector:
+    app.kubernetes.io/component: consent-and-auth-ui
+    app.kubernetes.io/instance: consent-and-auth-ui
+    app.kubernetes.io/name: consent-and-auth-ui
+    env: efs
+    tier: ui
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    affinity: directory
+    app: ds-cts
+    component: ds
+    env: efs
+  name: ds-cts
+  namespace: efs
+spec:
+  clusterIP: None
+  ports:
+  - name: admin
+    port: 4444
+  - name: ldap
+    port: 1389
+  - name: ldaps
+    port: 1636
+  - name: http
+    port: 8080
+  - name: https
+    port: 8443
+  selector:
+    affinity: directory
+    app: ds-cts
+    env: efs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    affinity: directory
+    app: ds-idrepo
+    component: ds
+    env: efs
+  name: ds-idrepo
+  namespace: efs
+spec:
+  clusterIP: None
+  ports:
+  - name: admin
+    port: 4444
+  - name: ldap
+    port: 1389
+  - name: ldaps
+    port: 1636
+  - name: http
+    port: 8080
+  - name: https
+    port: 8443
+  selector:
+    affinity: directory
+    app: ds-idrepo
+    env: efs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    affinity: directory
+    app: ds-umarepo
+    component: ds
+    env: efs
+  name: ds-umarepo
+  namespace: efs
+spec:
+  clusterIP: None
+  ports:
+  - name: admin
+    port: 4444
+  - name: ldap
+    port: 1389
+  - name: ldaps
+    port: 1636
+  - name: http
+    port: 8080
+  - name: https
+    port: 8443
+  selector:
+    affinity: directory
+    app: ds-umarepo
+    env: efs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: end-user-ui
+    app.kubernetes.io/name: end-user-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: end-user-ui
+  namespace: efs
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: end-user-ui
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: end-user-ui
+    app.kubernetes.io/name: end-user-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: idm
+    app.kubernetes.io/component: idm
+    app.kubernetes.io/instance: idm
+    app.kubernetes.io/name: idm
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: idm
+  namespace: efs
+spec:
+  ports:
+  - name: idm
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: idm
+    app.kubernetes.io/component: idm
+    app.kubernetes.io/instance: idm
+    app.kubernetes.io/name: idm
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ig
+    app.kubernetes.io/component: ig
+    app.kubernetes.io/instance: ig
+    app.kubernetes.io/name: ig
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: ig
+  namespace: efs
+spec:
+  ports:
+  - name: ig
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: ig
+    app.kubernetes.io/component: ig
+    app.kubernetes.io/instance: ig
+    app.kubernetes.io/name: ig
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: login-ui
+    app.kubernetes.io/name: login-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: login-ui
+  namespace: efs
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: login-ui
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: login-ui
+    app.kubernetes.io/name: login-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rcs-agent
+    app.kubernetes.io/component: rcs-agent
+    app.kubernetes.io/instance: rcs-agent
+    app.kubernetes.io/name: rcs-agent
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: rcs-agent
+  namespace: efs
+spec:
+  ports:
+  - name: rcs-agent
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: rcs-agent
+    app.kubernetes.io/component: rcs-agent
+    app.kubernetes.io/instance: rcs-agent
+    app.kubernetes.io/name: rcs-agent
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: admin-ui
+    app.kubernetes.io/name: admin-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: admin-ui
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-ui
+      app.kubernetes.io/component: ui
+      app.kubernetes.io/instance: admin-ui
+      app.kubernetes.io/name: admin-ui
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: ui
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: admin-ui
+        app.kubernetes.io/component: ui
+        app.kubernetes.io/instance: admin-ui
+        app.kubernetes.io/name: admin-ui
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: ui
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: platform-config
+        image: gcr.io/forgerock-io/platform-admin-ui:7.1.0
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /usr/sbin/nginx
+              - -s
+              - quit
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        name: admin-ui
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 100Mi
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: am
+    app.kubernetes.io/component: am
+    app.kubernetes.io/instance: am
+    app.kubernetes.io/name: am
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: am
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: am
+      app.kubernetes.io/component: am
+      app.kubernetes.io/instance: am
+      app.kubernetes.io/name: am
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: middle
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: am
+        app.kubernetes.io/component: am
+        app.kubernetes.io/instance: am
+        app.kubernetes.io/name: am
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: middle
+    spec:
+      containers:
+      - command:
+        - bash
+        - /home/forgerock/docker-entrypoint.sh
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: AM_STORES_SSL_ENABLED
+          value: "true"
+        - name: TRUSTSTORE_PATH
+          value: /home/forgerock/amtruststore
+        - name: TRUSTSTORE_PASSWORD
+          value: changeit
+        - name: AM_STORES_USER_TYPE
+          value: LDAPv3ForForgeRockIAM
+        envFrom:
+        - secretRef:
+            name: am-env-secrets
+        - configMapRef:
+            name: platform-config
+        - secretRef:
+            name: amster-env-secrets
+        - secretRef:
+            name: ds-env-secrets
+        - configMapRef:
+            name: pfs-endpoints-9b8fhmgg5d
+        image: origoacr.azurecr.io/am:f3e9dd3
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /am/json/health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        name: openam
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /am/json/health/ready
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 4Gi
+          requests:
+            cpu: 2000m
+            memory: 4Gi
+        volumeMounts:
+        - mountPath: /home/forgerock/amtruststore
+          name: new-truststore
+          readOnly: true
+          subPath: amtruststore
+        - mountPath: /var/run/secrets/am
+          name: am-secrets
+        - mountPath: /var/run/secrets/amster
+          name: amster-key
+        - mountPath: /home/forgerock/openam
+          name: fbc
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - command:
+        - /bin/bash
+        - -c
+        - |
+          if [ -d /fbc/.git ];
+          then
+            echo "Existing openam configuration found. Skipping copy"
+          else
+            echo "Copying docker image configuration files to the shared volume"
+            cd /home/forgerock/openam
+            cp -r .git .homeVersion * /fbc
+          fi
+        image: origoacr.azurecr.io/am:f3e9dd3
+        name: fbc-init
+        volumeMounts:
+        - mountPath: /fbc
+          name: fbc
+      - command:
+        - /home/forgerock/import-pem-certs.sh
+        env:
+        - name: TRUSTSTORE_PATH
+          value: /truststore/amtruststore
+        - name: TRUSTSTORE_PASSWORD
+          value: changeit
+        - name: AM_PEM_TRUSTSTORE
+          value: /var/run/secrets/truststore/cacerts
+        image: origoacr.azurecr.io/am:f3e9dd3
+        name: truststore-init
+        volumeMounts:
+        - mountPath: /truststore
+          name: new-truststore
+        - mountPath: /var/run/secrets/truststore
+          name: truststore
+      securityContext:
+        runAsGroup: 0
+        runAsUser: 11111
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir: {}
+        name: fbc
+      - name: am-secrets
+        projected:
+          sources:
+          - secret:
+              name: am-passwords
+          - secret:
+              name: am-keystore
+      - name: amster-key
+        secret:
+          items:
+          - key: id_rsa.pub
+            path: authorized_keys
+          secretName: amster
+      - name: truststore
+        secret:
+          secretName: truststore-pem
+      - emptyDir: {}
+        name: new-truststore
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: consent-and-auth-ui
+    app.kubernetes.io/instance: consent-and-auth-ui
+    app.kubernetes.io/name: consent-and-auth-ui
+    env: efs
+    tier: ui
+  name: consent-and-auth-ui
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: consent-and-auth-ui
+      app.kubernetes.io/instance: consent-and-auth-ui
+      app.kubernetes.io/name: consent-and-auth-ui
+      env: efs
+      tier: ui
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app.kubernetes.io/component: consent-and-auth-ui
+        app.kubernetes.io/instance: consent-and-auth-ui
+        app.kubernetes.io/name: consent-and-auth-ui
+        env: efs
+        tier: ui
+    spec:
+      containers:
+      - env:
+        - name: REACT_APP_FR_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: root
+              name: urls
+              optional: true
+        image: origoacr.azurecr.io/consent-and-auth-ui:latest
+        name: consent-and-auth-ui
+        ports:
+        - containerPort: 8081
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 5
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+      - image: origoacr.azurecr.io/consent-and-auth-ui-storybook:latest
+        name: consent-and-auth-ui-storybook
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: end-user-ui
+    app.kubernetes.io/name: end-user-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: end-user-ui
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: end-user-ui
+      app.kubernetes.io/component: ui
+      app.kubernetes.io/instance: end-user-ui
+      app.kubernetes.io/name: end-user-ui
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: ui
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: end-user-ui
+        app.kubernetes.io/component: ui
+        app.kubernetes.io/instance: end-user-ui
+        app.kubernetes.io/name: end-user-ui
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: ui
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: platform-config
+        image: gcr.io/forgerock-io/platform-enduser-ui:7.1.0
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /usr/sbin/nginx
+              - -s
+              - quit
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        name: end-user-ui
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 100Mi
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: idm
+    app.kubernetes.io/component: idm
+    app.kubernetes.io/instance: idm
+    app.kubernetes.io/name: idm
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: idm
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idm
+      app.kubernetes.io/component: idm
+      app.kubernetes.io/instance: idm
+      app.kubernetes.io/name: idm
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: middle
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: idm
+        app.kubernetes.io/component: idm
+        app.kubernetes.io/instance: idm
+        app.kubernetes.io/name: idm
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: middle
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: OPENIDM_REPO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: dirmanager.pw
+              name: ds-passwords
+        - name: USERSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: dirmanager.pw
+              name: ds-passwords
+        - name: RS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: IDM_RS_CLIENT_SECRET
+              name: amster-env-secrets
+        - name: RCS_AGENT_IDM_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: AGENT_IDM_SECRET
+              name: rcs-agent-env-secrets
+        - name: OPENIDM_ICF_RETRY_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              key: RCS_AGENT_ENABLED
+              name: platform-config
+        - name: OPENIDM_ICF_RETRY_UPDATES_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              key: RCS_AGENT_ENABLED
+              name: platform-config
+        - name: OPENIDM_OPTS
+          value: -Xmx1024m
+        envFrom:
+        - configMapRef:
+            name: idm
+        - secretRef:
+            name: idm-env-secrets
+        image: origoacr.azurecr.io/idm:f3e9dd3
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            httpHeaders:
+            - name: X-OpenIDM-Username
+              value: anonymous
+            - name: X-OpenIDM-Password
+              value: anonymous
+            - name: X-OpenIDM-NoSession
+              value: "true"
+            path: /openidm/info/ping
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 5
+        name: openidm
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            httpHeaders:
+            - name: X-OpenIDM-Username
+              value: anonymous
+            - name: X-OpenIDM-Password
+              value: anonymous
+            - name: X-OpenIDM-NoSession
+              value: "true"
+            path: /openidm/info/ping
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            cpu: 250m
+            memory: 768Mi
+        volumeMounts:
+        - mountPath: /var/run/secrets/idm
+          name: idm-secrets
+        - mountPath: /opt/openidm/idmtruststore
+          name: new-truststore
+          readOnly: true
+          subPath: idmtruststore
+        - mountPath: /opt/openidm/logs
+          name: logs
+        - mountPath: /opt/openidm/audit
+          name: audit-logs
+        - mountPath: /var/run/openidm/logging
+          name: idm-logging-properties
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until nslookup ds-cts.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local;
+          do echo waiting for ds-cts; sleep 2; done
+        image: busybox:latest
+        name: init-wait-for-ds
+      - command:
+        - /opt/openidm/bin/import-pem-certs.sh
+        env:
+        - name: TRUSTSTORE_PATH
+          value: /truststore/idmtruststore
+        - name: TRUSTSTORE_PASSWORD
+          value: changeit
+        - name: IDM_PEM_TRUSTSTORE
+          value: /var/run/secrets/truststore/cacerts
+        image: origoacr.azurecr.io/idm:f3e9dd3
+        name: truststore-init
+        volumeMounts:
+        - mountPath: /truststore
+          name: new-truststore
+        - mountPath: /var/run/secrets/truststore
+          name: truststore
+      serviceAccountName: idm
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: idm-secrets
+        secret:
+          secretName: idm
+      - emptyDir: {}
+        name: new-truststore
+      - name: truststore
+        secret:
+          secretName: truststore-pem
+      - emptyDir: {}
+        name: logs
+      - emptyDir: {}
+        name: audit-logs
+      - configMap:
+          name: idm-logging-properties
+        name: idm-logging-properties
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ig
+    app.kubernetes.io/component: ig
+    app.kubernetes.io/instance: ig
+    app.kubernetes.io/name: ig
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: ig
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ig
+      app.kubernetes.io/component: ig
+      app.kubernetes.io/instance: ig
+      app.kubernetes.io/name: ig
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: middle
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: ig
+        app.kubernetes.io/component: ig
+        app.kubernetes.io/instance: ig
+        app.kubernetes.io/name: ig
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: middle
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        envFrom:
+        - secretRef:
+            name: openig-secrets-env
+        image: origoacr.azurecr.io/ig:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /kube/liveness
+            port: 8080
+          periodSeconds: 30
+          timeoutSeconds: 5
+        name: ig
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /kube/readiness
+            port: 8080
+          initialDelaySeconds: 5
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      serviceAccountName: ig
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/instance: login-ui
+    app.kubernetes.io/name: login-ui
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: ui
+  name: login-ui
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: login-ui
+      app.kubernetes.io/component: ui
+      app.kubernetes.io/instance: login-ui
+      app.kubernetes.io/name: login-ui
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: ui
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: login-ui
+        app.kubernetes.io/component: ui
+        app.kubernetes.io/instance: login-ui
+        app.kubernetes.io/name: login-ui
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: ui
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: platform-config
+        image: gcr.io/forgerock-io/platform-login-ui:7.1.0
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /usr/sbin/nginx
+              - -s
+              - quit
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        name: login-ui
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 100Mi
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rcs-agent
+    app.kubernetes.io/component: rcs-agent
+    app.kubernetes.io/instance: rcs-agent
+    app.kubernetes.io/name: rcs-agent
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+    tier: middle
+  name: rcs-agent
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rcs-agent
+      app.kubernetes.io/component: rcs-agent
+      app.kubernetes.io/instance: rcs-agent
+      app.kubernetes.io/name: rcs-agent
+      app.kubernetes.io/part-of: forgerock
+      env: efs
+      tier: middle
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: rcs-agent
+        app.kubernetes.io/component: rcs-agent
+        app.kubernetes.io/instance: rcs-agent
+        app.kubernetes.io/name: rcs-agent
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+        tier: middle
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LOGGING_PROPERTIES
+          value: /var/run/rcs-agent/logging/logging.properties
+        - name: ARGS
+          value: -p /var/run/rcs-agent/config/Agent.properties
+        envFrom:
+        - secretRef:
+            name: rcs-agent-env-secrets
+        image: gcr.io/forgerock-io/rcs-agent:1.5.20.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: rcs-agent-port
+          initialDelaySeconds: 5
+          periodSeconds: 60
+          timeoutSeconds: 5
+        name: rcs-agent
+        ports:
+        - containerPort: 8080
+          name: rcs-agent-port
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: rcs-agent-port
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/run/rcs-agent/config
+          name: rcs-agent-config-properties
+        - mountPath: /var/run/rcs-agent/logging
+          name: rcs-agent-logging-properties
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          name: rcs-agent-config-properties
+        name: rcs-agent-config-properties
+      - configMap:
+          name: rcs-agent-logging-properties
+        name: rcs-agent-logging-properties
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    affinity: directory
+    app: ds-cts
+    env: efs
+    tier: ds
+  name: ds-cts
+  namespace: efs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      affinity: directory
+      app: ds-cts
+      env: efs
+  serviceName: ds-cts
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        affinity: directory
+        app: ds-cts
+        env: efs
+        tier: ds
+    spec:
+      containers:
+      - args:
+        - start-ds
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-cts
+        image: origoacr.azurecr.io/dscts:f3e9dd3
+        name: ds
+        ports:
+        - containerPort: 1389
+          name: ldap
+        - containerPort: 1636
+          name: ldaps
+        - containerPort: 4444
+          name: admin
+        - containerPort: 8989
+          name: replication
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        resources:
+          limits:
+            memory: 5Gi
+          requests:
+            cpu: 512m
+            memory: 250Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - command:
+        - /opt/opendj/scripts/init-and-restore.sh
+        env:
+        - name: DS_SET_UID_ADMIN_AND_MONITOR_PASSWORDS
+          value: "true"
+        - name: DS_UID_MONITOR_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/monitor.pw
+        - name: DS_UID_ADMIN_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/dirmanager.pw
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        - name: AUTORESTORE_FROM_DSBACKUP
+          valueFrom:
+            configMapKeyRef:
+              key: AUTORESTORE_FROM_DSBACKUP
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-cts
+        image: origoacr.azurecr.io/dscts:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        name: initialize
+        resources:
+          limits:
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+        - mountPath: /var/run/secrets/opendj-passwords
+          name: passwords
+      securityContext:
+        fsGroup: 0
+        runAsUser: 11111
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: WorkerDedicatedDS
+        operator: Exists
+      volumes:
+      - name: secrets
+        secret:
+          secretName: ds
+      - name: passwords
+        secret:
+          secretName: ds-passwords
+      - emptyDir: {}
+        name: cloud-credentials-cache
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      annotations:
+        pv.beta.kubernetes.io/gid: "0"
+      labels:
+        env: efs
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: efs-sc
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    affinity: directory
+    app: ds-idrepo
+    env: efs
+    tier: ds
+  name: ds-idrepo
+  namespace: efs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      affinity: directory
+      app: ds-idrepo
+      env: efs
+  serviceName: ds-idrepo
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        affinity: directory
+        app: ds-idrepo
+        env: efs
+        tier: ds
+    spec:
+      containers:
+      - args:
+        - start-ds
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-idrepo
+        image: origoacr.azurecr.io/dsidrepo:f3e9dd3
+        name: ds
+        ports:
+        - containerPort: 1389
+          name: ldap
+        - containerPort: 1636
+          name: ldaps
+        - containerPort: 4444
+          name: admin
+        - containerPort: 8989
+          name: replication
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        resources:
+          limits:
+            memory: 6Gi
+          requests:
+            cpu: 512m
+            memory: 250Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - command:
+        - /opt/opendj/scripts/init-and-restore.sh
+        env:
+        - name: DS_SET_UID_ADMIN_AND_MONITOR_PASSWORDS
+          value: "true"
+        - name: DS_UID_MONITOR_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/monitor.pw
+        - name: DS_UID_ADMIN_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/dirmanager.pw
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        - name: AUTORESTORE_FROM_DSBACKUP
+          valueFrom:
+            configMapKeyRef:
+              key: AUTORESTORE_FROM_DSBACKUP
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-idrepo
+        image: origoacr.azurecr.io/dsidrepo:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        name: initialize
+        resources:
+          limits:
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+        - mountPath: /var/run/secrets/opendj-passwords
+          name: passwords
+      securityContext:
+        fsGroup: 0
+        runAsUser: 11111
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: WorkerDedicatedDS
+        operator: Exists
+      volumes:
+      - name: secrets
+        secret:
+          secretName: ds
+      - name: passwords
+        secret:
+          secretName: ds-passwords
+      - emptyDir: {}
+        name: cloud-credentials-cache
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      annotations:
+        pv.beta.kubernetes.io/gid: "0"
+      labels:
+        env: efs
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: efs-sc
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    affinity: directory
+    app: ds-umarepo
+    env: efs
+    tier: ds
+  name: ds-umarepo
+  namespace: efs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      affinity: directory
+      app: ds-umarepo
+      env: efs
+  serviceName: ds-umarepo
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        affinity: directory
+        app: ds-umarepo
+        env: efs
+        tier: ds
+    spec:
+      containers:
+      - args:
+        - start-ds
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-idrepo
+        image: origoacr.azurecr.io/dsumarepo:f3e9dd3
+        name: ds
+        ports:
+        - containerPort: 1389
+          name: ldap
+        - containerPort: 1636
+          name: ldaps
+        - containerPort: 4444
+          name: admin
+        - containerPort: 8989
+          name: replication
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        resources:
+          limits:
+            memory: 6Gi
+          requests:
+            cpu: 512m
+            memory: 250Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - command:
+        - /opt/opendj/scripts/init-and-restore.sh
+        env:
+        - name: DS_SET_UID_ADMIN_AND_MONITOR_PASSWORDS
+          value: "true"
+        - name: DS_UID_MONITOR_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/monitor.pw
+        - name: DS_UID_ADMIN_PASSWORD_FILE
+          value: /var/run/secrets/opendj-passwords/dirmanager.pw
+        - name: DSBACKUP_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_HOSTS
+              name: platform-config
+        - name: DSBACKUP_DIRECTORY
+          valueFrom:
+            configMapKeyRef:
+              key: DSBACKUP_DIRECTORY
+              name: platform-config
+        - name: AUTORESTORE_FROM_DSBACKUP
+          valueFrom:
+            configMapKeyRef:
+              key: AUTORESTORE_FROM_DSBACKUP
+              name: platform-config
+        envFrom:
+        - secretRef:
+            name: cloud-storage-credentials-uma
+        image: origoacr.azurecr.io/dsumarepo:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        name: initialize
+        resources:
+          limits:
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /opt/opendj/data
+          name: data
+        - mountPath: /opt/opendj/secrets
+          name: secrets
+        - mountPath: /var/run/secrets/opendj
+          name: secrets
+        - mountPath: /var/run/secrets/cloud-credentials-cache/
+          name: cloud-credentials-cache
+        - mountPath: /var/run/secrets/opendj-passwords
+          name: passwords
+      securityContext:
+        fsGroup: 0
+        runAsUser: 11111
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: WorkerDedicatedDS
+        operator: Exists
+      volumes:
+      - name: secrets
+        secret:
+          secretName: ds
+      - name: passwords
+        secret:
+          secretName: ds-passwords
+      - emptyDir: {}
+        name: cloud-credentials-cache
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      annotations:
+        pv.beta.kubernetes.io/gid: "0"
+      labels:
+        env: efs
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: efs-sc
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: am
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: am
+      env: efs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: ds-cts
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: ds-cts
+      env: efs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: ds-idrepo
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: ds-idrepo
+      env: efs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: ds-umarepo
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: ds-umarepo
+      env: efs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: idm
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: idm
+      env: efs
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    env: efs
+  name: ig
+  namespace: efs
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: ig
+      env: efs
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: amster
+    app.kubernetes.io/component: am
+    app.kubernetes.io/instance: amster
+    app.kubernetes.io/name: amster
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+  name: amster
+  namespace: efs
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: amster
+        app.kubernetes.io/component: am
+        app.kubernetes.io/instance: amster
+        app.kubernetes.io/name: amster
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+    spec:
+      containers:
+      - args:
+        - bash
+        - -c
+        - sleep 10
+        image: origoacr.azurecr.io/amster:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        name: pause
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /etc/hosts
+          initialDelaySeconds: 1
+        volumeMounts:
+        - mountPath: /var/tmp/amster
+          name: export-files
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      initContainers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: platform-config
+        - secretRef:
+            name: amster-env-secrets
+        - secretRef:
+            name: ds-env-secrets
+        image: origoacr.azurecr.io/amster:f3e9dd3
+        imagePullPolicy: IfNotPresent
+        name: amster
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/run/secrets/amster
+          name: amster-secrets
+          readOnly: true
+        - mountPath: /var/tmp/amster
+          name: export-files
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: amster-secrets
+        secret:
+          secretName: amster
+      - configMap:
+          name: platform-config
+        name: platform-config
+      - emptyDir: {}
+        name: export-files
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: ldif-importer
+    app.kubernetes.io/component: directory
+    app.kubernetes.io/instance: ldif-importer
+    app.kubernetes.io/name: ldif-importer
+    app.kubernetes.io/part-of: forgerock
+    env: efs
+  name: ldif-importer
+  namespace: efs
+spec:
+  template:
+    metadata:
+      labels:
+        app: ldif-importer
+        app.kubernetes.io/component: directory
+        app.kubernetes.io/instance: ldif-importer
+        app.kubernetes.io/name: ldif-importer
+        app.kubernetes.io/part-of: forgerock
+        env: efs
+    spec:
+      containers:
+      - envFrom:
+        - secretRef:
+            name: ds-env-secrets
+        image: origoacr.azurecr.io/ldifimporter:f3e9dd3
+        name: ldif-importer
+        volumeMounts:
+        - mountPath: /var/run/secrets/opendj-passwords
+          name: passwords
+      imagePullSecrets:
+      - name: origoacr-credentials-hdh6kk64gh
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 0
+        runAsUser: 11111
+      volumes:
+      - name: passwords
+        secret:
+          secretName: ds-passwords
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    env: efs
+  name: consent-and-auth-ui
+  namespace: efs
+spec:
+  rules:
+  - host: ca-ui.efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: consent-and-auth-ui
+          servicePort: 8081
+        path: /
+  tls:
+  - hosts:
+    - ca-ui.efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: ca-ui-sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    env: efs
+  name: consent-and-auth-ui-storybook
+  namespace: efs
+spec:
+  rules:
+  - host: ca-ui.efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: consent-and-auth-ui-storybook
+          servicePort: 8082
+        path: /storybook(/|$)(.*)
+  tls:
+  - hosts:
+    - ca-ui.efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: ca-ui-sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/enduser)$ $1/ redirect;
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  labels:
+    env: efs
+  name: end-user-ui
+  namespace: efs
+spec:
+  rules:
+  - host: efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: end-user-ui
+          servicePort: 8080
+        path: /enduser/?(.*)
+  tls:
+  - hosts:
+    - efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    haproxy.router.openshift.io/cookie_name: route
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/body-size: 64m
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: 64m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/send-timeout: "600"
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: route
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: rcs-agent
+    nginx.org/websocket-services: rcs-agent
+  labels:
+    env: efs
+  name: forgerock
+  namespace: efs
+spec:
+  rules:
+  - host: efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: am
+          servicePort: 80
+        path: /am
+      - backend:
+          serviceName: idm
+          servicePort: 80
+        path: /openidm
+      - backend:
+          serviceName: idm
+          servicePort: 80
+        path: /upload
+      - backend:
+          serviceName: idm
+          servicePort: 80
+        path: /export
+      - backend:
+          serviceName: idm
+          servicePort: 80
+        path: /admin
+      - backend:
+          serviceName: idm
+          servicePort: 80
+        path: /openicf
+      - backend:
+          serviceName: rcs-agent
+          servicePort: 80
+        path: /rcs
+  tls:
+  - hosts:
+    - efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    env: efs
+  name: ig-web
+  namespace: efs
+spec:
+  rules:
+  - host: efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: ig
+          servicePort: 8080
+        path: /ig(/|$)(.*)
+  tls:
+  - hosts:
+    - efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/login)$ $1/ redirect;
+      rewrite ^(/am/XUI)$ $1/ redirect;
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  labels:
+    env: efs
+  name: login-ui
+  namespace: efs
+spec:
+  rules:
+  - host: efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: login-ui
+          servicePort: 8080
+        path: /login/?(.*)
+      - backend:
+          serviceName: login-ui
+          servicePort: 8080
+        path: /am/XUI/?(.*)
+  tls:
+  - hosts:
+    - efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: sslcert
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: default-issuer
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/platform)$ $1/ redirect;
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  labels:
+    env: efs
+  name: platform-ui
+  namespace: efs
+spec:
+  rules:
+  - host: efs.sandbox.k8s.dev.pensiondashboard.org
+    http:
+      paths:
+      - backend:
+          serviceName: admin-ui
+          servicePort: 8080
+        path: /platform/?(.*)
+  tls:
+  - hosts:
+    - efs.sandbox.k8s.dev.pensiondashboard.org
+    secretName: sslcert
+---
+apiVersion: secret-agent.secrets.forgerock.io/v1alpha1
+kind: SecretAgentConfiguration
+metadata:
+  labels:
+    env: efs
+  name: forgerock-sac
+  namespace: efs
+spec:
+  appConfig:
+    awsRegion: eu-west-2
+    createKubernetesObjects: true
+    secretsManager: AWS
+    secretsManagerPrefix: dev
+  secrets:
+  - keys:
+    - name: ca
+      spec:
+        distinguishedName:
+          commonName: Deployment key
+          organization:
+          - ForgeRock.com
+      type: ca
+    name: platform-ca
+  - keys:
+    - name: cacerts
+      spec:
+        truststoreImportPaths:
+        - platform-ca/ca
+      type: truststore
+    name: truststore
+  - keys:
+    - name: cacerts
+      spec:
+        pemFormat: true
+        truststoreImportPaths:
+        - platform-ca/ca
+      type: truststore
+    name: truststore-pem
+  - keys:
+    - name: dirmanager.pw
+      spec:
+        length: 32
+      type: password
+    - name: monitor.pw
+      spec:
+        value: password
+      type: literal
+    name: ds-passwords
+  - keys:
+    - name: .keypass
+      spec:
+        length: 24
+      type: password
+    - name: .storepass
+      spec:
+        length: 24
+      type: password
+    - name: username
+      spec:
+        value: amadmin
+      type: literal
+    name: am-passwords
+  - keys:
+    - name: ssl-key-pair
+      spec:
+        algorithm: ECDSAWithSHA256
+        distinguishedName:
+          commonName: ds
+          organization:
+          - ForgeRock.com
+        sans:
+        - '*.ds'
+        - '*.ds-idrepo'
+        - '*.ds-cts'
+        - '*.ds-umarepo'
+        - ds-cts
+        - ds-idrepo
+        - ds-umarepo
+        signedWithPath: platform-ca/ca
+      type: keyPair
+    - name: master-key-pair
+      spec:
+        algorithm: SHA256WithRSA
+        distinguishedName:
+          commonName: Master key
+          organization:
+          - ForgeRock.com
+        duration: -72h
+        selfSigned: true
+      type: keyPair
+    - name: keystore.pin
+      spec:
+        length: 32
+      type: password
+    - name: keystore
+      spec:
+        keyPassPath: ds/keystore.pin
+        keytoolAliases:
+        - cmd: importcert
+          name: ca-cert
+          sourcePath: platform-ca/ca
+        - cmd: importkeystore
+          isKeyPair: true
+          name: ssl-key-pair
+          sourcePath: ds/ssl-key-pair
+        - cmd: importkeystore
+          isKeyPair: true
+          name: master-key
+          sourcePath: ds/master-key-pair
+        storePassPath: ds/keystore.pin
+        storeType: pkcs12
+      type: keytool
+    name: ds
+  - keys:
+    - name: AM_AUTHENTICATION_SHARED_SECRET
+      spec:
+        length: 32
+        useBinaryCharacters: true
+      type: password
+    - name: AM_ENCRYPTION_KEY
+      spec:
+        length: 24
+      type: password
+    - name: AM_OIDC_CLIENT_SUBJECT_IDENTIFIER_HASH_SALT
+      spec:
+        length: 20
+      type: password
+    - name: AM_PASSWORDS_AMADMIN_CLEAR
+      spec:
+        length: 24
+      type: password
+    - name: AM_SELFSERVICE_LEGACY_CONFIRMATION_EMAIL_LINK_SIGNING_KEY
+      spec:
+        length: 32
+        useBinaryCharacters: true
+      type: password
+    - name: AM_SESSION_STATELESS_ENCRYPTION_KEY
+      spec:
+        length: 32
+        useBinaryCharacters: true
+      type: password
+    - name: AM_SESSION_STATELESS_SIGNING_KEY
+      spec:
+        length: 32
+        useBinaryCharacters: true
+      type: password
+    name: am-env-secrets
+  - keys:
+    - name: keystore.jceks
+      spec:
+        keyPassPath: am-passwords/.keypass
+        keytoolAliases:
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=rsajwtsigningkey,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: rsajwtsigningkey
+        - args:
+          - -keyalg
+          - EC
+          - -keysize
+          - "256"
+          - -sigalg
+          - SHA256withECDSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=es256test,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: es256test
+        - args:
+          - -keyalg
+          - EC
+          - -keysize
+          - "384"
+          - -sigalg
+          - SHA256withECDSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=es384test,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: es384test
+        - args:
+          - -keyalg
+          - EC
+          - -keysize
+          - "521"
+          - -sigalg
+          - SHA256withECDSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=es512test,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: es512test
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=selfserviceenctest,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: selfserviceenctest
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=test,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: test
+        - args:
+          - -keyalg
+          - HMacSHA512
+          - -keysize
+          - "512"
+          cmd: genseckey
+          name: hmacsigningtest
+        - args:
+          - -keyalg
+          - HMacSHA512
+          - -keysize
+          - "256"
+          cmd: genseckey
+          name: selfservicesigntest
+        - args:
+          - -keyalg
+          - aes
+          - -keysize
+          - "256"
+          cmd: genseckey
+          name: directenctest
+        - args:
+          - -keyalg
+          - AES
+          - -keysize
+          - "128"
+          cmd: genseckey
+          name: sms.transport.key
+        - cmd: importpassword
+          name: configstorepwd
+          sourcePath: am-passwords/.storepass
+        - cmd: importpassword
+          name: dsameuserpwd
+          sourcePath: ds-passwords/dirmanager.pw
+        storePassPath: am-passwords/.storepass
+        storeType: jceks
+      type: keytool
+    name: am-keystore
+  - keys:
+    - name: IDM_PROVISIONING_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: IDM_RS_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: OIDC_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: DASHBOARD_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: AM_TREE_ADMIN_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: UMA_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    - name: ISP_RESOURCE_SERVER_CLIENT_SECRET
+      spec:
+        length: 24
+      type: password
+    name: amster-env-secrets
+  - keys:
+    - name: id_rsa
+      type: ssh
+    name: amster
+  - keys:
+    - name: AM_STORES_APPLICATION_PASSWORD
+      spec:
+        length: 32
+      type: password
+    - name: AM_STORES_CTS_PASSWORD
+      spec:
+        length: 32
+      type: password
+    - name: AM_STORES_USER_PASSWORD
+      spec:
+        length: 32
+      type: password
+    - name: AM_STORES_UMA_PASSWORD
+      spec:
+        length: 32
+      type: password
+    name: ds-env-secrets
+  - keys:
+    - name: OPENIDM_ADMIN_PASSWORD
+      spec:
+        length: 24
+      type: password
+    - name: OPENIDM_KEYSTORE_PASSWORD
+      spec:
+        length: 24
+      type: password
+    name: idm-env-secrets
+  - keys:
+    - name: truststore
+      spec:
+        truststoreImportPaths:
+        - platform-ca/ca
+      type: truststore
+    - name: keystore.jceks
+      spec:
+        keyPassPath: idm-env-secrets/OPENIDM_KEYSTORE_PASSWORD
+        keytoolAliases:
+        - args:
+          - -keyalg
+          - aes
+          - -keysize
+          - "128"
+          cmd: genseckey
+          name: openidm-sym-default
+        - args:
+          - -keyalg
+          - HmacSHA256
+          - -keysize
+          - "256"
+          cmd: genseckey
+          name: openidm-jwtsessionhmac-key
+        - args:
+          - -keyalg
+          - aes
+          - -keysize
+          - "128"
+          cmd: genseckey
+          name: openidm-selfservice-key
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=server-cert,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: server-cert
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=selfservice,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: selfservice
+        - args:
+          - -keyalg
+          - RSA
+          - -keysize
+          - "2048"
+          - -sigalg
+          - SHA256WITHRSA
+          - -validity
+          - "3650"
+          - -dname
+          - CN=openidm-localhost,O=ForgeRock,L=Bristol,ST=Bristol,C=UK
+          cmd: genkeypair
+          name: openidm-localhost
+        storePassPath: idm-env-secrets/OPENIDM_KEYSTORE_PASSWORD
+        storeType: jceks
+      type: keytool
+    name: idm
+  - keys:
+    - name: AGENT_IDM_SECRET
+      spec:
+        length: 32
+      type: password
+    - name: AGENT_RCS_SECRET
+      spec:
+        length: 32
+      type: password
+    name: rcs-agent-env-secrets
