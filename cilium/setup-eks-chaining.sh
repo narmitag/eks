@@ -1,5 +1,20 @@
-export AWS_REGION=eu-west-2
-export AWS_DEFAULT_REGION=eu-west-2
+curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
+rm cilium-linux-amd64.tar.gz{,.sha256sum}
+
+
+export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
+curl -L --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-amd64.tar.gz{,.sha256sum}
+sha256sum --check hubble-linux-amd64.tar.gz.sha256sum
+sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
+rm hubble-linux-amd64.tar.gz{,.sha256sum}
+
+
+
+
+export AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
 export CLUSTER_NAME=cilium-cluster
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
@@ -11,13 +26,13 @@ kind: ClusterConfig
 metadata:
   name: ${CLUSTER_NAME}
   region: ${AWS_DEFAULT_REGION}
-  version: "1.21"
+  version: "1.22"
 
 availabilityZones: ["${AWS_DEFAULT_REGION}a","${AWS_DEFAULT_REGION}b"]
 managedNodeGroups:
-  - instanceType: t3.small
+  - instanceType: t3.medium
     name: ${CLUSTER_NAME}-ng
-    desiredCapacity: 1
+    desiredCapacity: 2
     minSize: 1
     maxSize: 2
 
@@ -27,7 +42,7 @@ aws eks update-kubeconfig --name ${CLUSTER_NAME} --region=${AWS_DEFAULT_REGION}
 
 helm repo add cilium https://helm.cilium.io/
 
-helm install cilium cilium/cilium --version 1.9.13 \
+helm install cilium cilium/cilium --version 1.11.3 \
   --namespace kube-system \
   --set cni.chainingMode=aws-cni \
   --set enableIPv4Masquerade=false \
