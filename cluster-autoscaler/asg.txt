@@ -1,1 +1,0 @@
-eks-nodegroupA-2ebf9851-0bec-3317-2ace-5ffe66266108	eks-nodegroupB-04bf9851-091c-57b4-5889-0234ae7aa292	eks-nodegroupC-a6bf9851-1314-8241-02eb-d4d6612ec846
