@@ -15,8 +15,9 @@ rm hubble-linux-amd64.tar.gz{,.sha256sum}
 
 export AWS_REGION=us-east-1
 export AWS_DEFAULT_REGION=us-east-1
-export CLUSTER_NAME=cilium-cluster
+export CLUSTER_NAME=cilium-cluster2
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+export CILIUM_NAMESPACE=kube-system
 
 eksctl create cluster -f - << EOF
 ---
@@ -72,7 +73,7 @@ envsubst < cluster-autoscaler-autodiscover.yaml | kubectl apply -f -
 
 kubectl -n kube-system annotate deployment.apps/cluster-autoscaler  cluster-autoscaler.kubernetes.io/safe-to-evict="false"
 
-export AUTOSCALER_VERSION=1.21.2
+export AUTOSCALER_VERSION=1.22.2
 kubectl -n kube-system \
     set image deployment.apps/cluster-autoscaler \
     cluster-autoscaler=us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v${AUTOSCALER_VERSION}
@@ -82,14 +83,8 @@ kubectl -n kube-system \
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/aws/deploy.yaml
 
 
-#linkerd install | kubectl apply -f -
 
-
- kubectl port-forward -n $CILIUM_NAMESPACE svc/hubble-ui --address 0.0.0.0 --address :: 12000:80
- http://localhost:12000/ 
-
-
-kubectl port-forward -n $CILIUM_NAMESPACE svc/hubble-relay --address 0.0.0.0 --address :: 4245:80
+kubectl port-forward -n $CILIUM_NAMESPACE svc/hubble-relay --address 0.0.0.0 --address :: 4245:80 &
 
 hubble --server localhost:4245 status
 hubble --server localhost:4245 observe

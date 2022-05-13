@@ -1,3 +1,7 @@
+Assumes a cluster exists 
+
+
+
 export CLUSTER=forgerock-test
 
 vpc_id=$(aws eks describe-cluster \

@@ -1,20 +1,7 @@
 #from https://karpenter.sh/v0.6.3/getting-started/
 
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-
-sudo yum -y install jq gettext bash-completion moreutils envsubst
-
-curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-
-sudo mv -v /tmp/eksctl /usr/local/bin
-
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
 export CLUSTER_NAME="karpenter-demo"
-export AWS_DEFAULT_REGION="us-east-1"
+export AWS_DEFAULT_REGION="eu-west-1"
 export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 
 eksctl create cluster -f - << EOF
@@ -36,6 +23,8 @@ managedNodeGroups:
 iam:
   withOIDC: true
 EOF
+
+aws eks update-kubeconfig --name ${CLUSTER_NAME} --region=${AWS_DEFAULT_REGION}
 
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name ${CLUSTER_NAME} --query "cluster.endpoint" --output text)"
 
