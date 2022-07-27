@@ -1,0 +1,11 @@
+BUCKET=pdp-eks-velero-backup-dev
+REGION=eu-west-2
+
+
+ velero install --provider aws --plugins velero/velero-plugin-for-aws:v1.2.0 --bucket backups --backup-location-config region=us-west-2 --snapshot-location-config region=eu-west-2 --no-secret --pod-annotations iam.amazonaws.com/role=arn:aws:iam::569221643395:role/dev-velero
+
+velero backup create  backup-demo --include-namespaces backup-demo
+
+velero restore create  --from-backup backup-demo
+
+ velero schedule create backup-demo-schedule --schedule="0 3 * * *" --include-namespaces backup-demo

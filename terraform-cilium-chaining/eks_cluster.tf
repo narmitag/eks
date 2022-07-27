@@ -38,13 +38,16 @@ module "eks" {
   version                         = "17.24.0"
   cluster_name                    = local.cluster_name
   cluster_version                 = var.eks_version
-  subnets                         = module.vpc.private_subnets
-  vpc_id                          = module.vpc.vpc_id
+  #subnets                         = module.vpc.private_subnets
+  subnets                         = ["subnet-03ca395c91fd7ff51", "subnet-078deee288f13f6fc", "subnet-0df41a70c2b48abd5"]
+  #vpc_id                          = module.vpc.vpc_id
+  vpc_id                          = "vpc-08772a1a54a0e1d5a"
   enable_irsa                     = true
   cluster_endpoint_private_access = true
   #cluster_endpoint_public_access  = !var.vpn_only
-  cluster_endpoint_public_access  = true
+  cluster_endpoint_public_access  = false
   map_roles                            = var.map_roles
+  
 
   cluster_enabled_log_types = ["scheduler", "controllerManager", "authenticator", "audit", "api"]
 
@@ -55,11 +58,11 @@ module "eks" {
     }
   ]
 
-  worker_groups = [for i, s in module.vpc.private_subnets : {
+  worker_groups = [for i, s in ["subnet-03ca395c91fd7ff51", "subnet-078deee288f13f6fc", "subnet-0df41a70c2b48abd5"] : {
     name                   = "${local.cluster_name}_worker-group-${i}"
     subnets                = [s]
     instance_type          = var.production ? local.node_type_production : local.node_type_nonprod
-    asg_desired_capacity   = ceil(var.eks_desired_nodes / length(module.vpc.private_subnets))
+    asg_desired_capacity   = ceil(var.eks_desired_nodes / length(["subnet-03ca395c91fd7ff51", "subnet-078deee288f13f6fc", "subnet-0df41a70c2b48abd5"]))
     root_volume_type       = "gp3"
     root_volume_throughput = 125
     root_volume_size       = 80

@@ -1,7 +1,7 @@
 resource "aws_security_group" "allow_tls_from_eks" {
   name        = "allow_tls_from_eks"
   description = "Allow TLS inbound from EKS worker nodes"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = "vpc-08772a1a54a0e1d5a"
 
   ingress = [
     {
@@ -33,7 +33,7 @@ resource "aws_security_group" "allow_tls_from_eks" {
 }
 
 resource "aws_vpc_endpoint" "api_gateway_endpoint" {
-  vpc_id            = module.vpc.vpc_id
+  vpc_id            = "vpc-08772a1a54a0e1d5a"
   service_name      = "com.amazonaws.${var.region}.execute-api"
   vpc_endpoint_type = "Interface"
 
@@ -41,7 +41,7 @@ resource "aws_vpc_endpoint" "api_gateway_endpoint" {
     aws_security_group.allow_tls_from_eks.id,
   ]
 
-  subnet_ids          = module.vpc.private_subnets
+  subnet_ids          = ["subnet-03ca395c91fd7ff51", "subnet-078deee288f13f6fc", "subnet-0df41a70c2b48abd5"]
   private_dns_enabled = true
 }
 
