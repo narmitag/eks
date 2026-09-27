@@ -1,5 +1,5 @@
 module "cloudwatch_logs" {
-  source = "git::https://github.com/DNXLabs/terraform-aws-eks-cloudwatch-logs.git?ref=0.1.4"
+  source = "git::https://github.com/DNXLabs/terraform-aws-eks-cloudwatch-logs.git?ref=0.1.5"
 
   enabled = true
 
