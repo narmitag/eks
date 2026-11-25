@@ -11,7 +11,7 @@ module "cloudwatch_logs" {
 }
 
 module "cloudwatch_metrics" {
-  source = "git::https://github.com/DNXLabs/terraform-aws-eks-cloudwatch-metrics.git?ref=0.1.1"
+  source = "git::https://github.com/DNXLabs/terraform-aws-eks-cloudwatch-metrics.git?ref=1.0.0"
 
   cluster_name                     = module.eks.cluster_id
   cluster_identity_oidc_issuer     = module.eks.cluster_oidc_issuer_url
