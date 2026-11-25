@@ -35,7 +35,7 @@ variable "map_roles" {
 #tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
-  version                         = "17.24.0"
+  version                         = "21.30.2"
   cluster_name                    = local.cluster_name
   cluster_version                 = var.eks_version
   #subnets                         = module.vpc.private_subnets
